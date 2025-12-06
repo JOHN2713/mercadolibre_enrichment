@@ -36,7 +36,7 @@ pip install -r requirements.txt
 1. Crear archivo `.env` en la raíz del proyecto:
 
 ```env
-MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/
+
 ```
 
 2. Reemplazar con tu URI de MongoDB Atlas
