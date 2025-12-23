@@ -21,10 +21,10 @@ reviews_col = db["raw_reviews"]
 # Cargar modelo de sentimiento (multilingüe español)
 # ------------------------
 print("="*80)
-print("🤖 CARGANDO MODELO DE ANÁLISIS DE SENTIMIENTO")
+print("CARGANDO MODELO DE ANÁLISIS DE SENTIMIENTO")
 print("="*80)
-print("📦 Modelo: pysentimiento/robertuito-sentiment-analysis")
-print("⏳ Esto puede tardar un poco la primera vez...")
+print("Modelo: pysentimiento/robertuito-sentiment-analysis")
+print("Esto puede tardar un poco la primera vez...")
 
 MODEL_NAME = "pysentimiento/robertuito-sentiment-analysis"
 
@@ -35,9 +35,9 @@ try:
         tokenizer=MODEL_NAME,
         device=-1  # -1 = CPU, 0 = GPU
     )
-    print("✅ Modelo cargado correctamente\n")
+    print("Modelo cargado correctamente\n")
 except Exception as e:
-    print(f"❌ Error al cargar modelo: {e}")
+    print(f"Error al cargar modelo: {e}")
     exit(1)
 
 def analizar_sentimiento(texto: str):
@@ -77,7 +77,7 @@ def analizar_sentimiento(texto: str):
         return stars, sentiment_score, sentiment_label, confidence
     
     except Exception as e:
-        print(f"  ⚠️ Error al analizar: {str(e)[:50]}...")
+        print(f" Error al analizar: {str(e)[:50]}...")
         return None, None, None, None
 
 
@@ -134,7 +134,7 @@ def enriquecer_lote(limit=50, mostrar_ejemplos=False):
 
 def main():
     print("="*80)
-    print("🚀 ENRIQUECIMIENTO DE SENTIMIENTOS")
+    print("ENRIQUECIMIENTO DE SENTIMIENTOS")
     print("="*80)
     
     # Estadísticas iniciales
@@ -148,19 +148,19 @@ def main():
     print(f"  • Pendientes de analizar: {sin_sentimiento}")
     
     if sin_sentimiento == 0:
-        print("\n✅ No hay reseñas pendientes de analizar")
+        print("\nNo hay reseñas pendientes de analizar")
         return
     
     # Distribución de sentimientos existentes
     if con_sentimiento > 0:
-        print(f"\n📊 Distribución actual de sentimientos:")
+        print(f"\nDistribución actual de sentimientos:")
         for label in ["positivo", "neutral", "negativo"]:
             count = reviews_col.count_documents({"sentiment_label": label})
             porcentaje = (count / con_sentimiento) * 100 if con_sentimiento > 0 else 0
             print(f"  • {label.capitalize()}: {count} ({porcentaje:.1f}%)")
     
     # Opciones
-    print(f"\n⚠️ OPCIONES:")
+    print(f"\nOPCIONES:")
     print(f"  1. Procesar TODAS las reseñas pendientes ({sin_sentimiento} reseñas)")
     print(f"  2. Procesar en lotes de 50 (modo interactivo)")
     print(f"  3. Reanalizar TODO (borrar sentimientos existentes)")
@@ -168,7 +168,7 @@ def main():
     opcion = input("\nSelecciona una opción (1/2/3): ").strip()
     
     if opcion == "3":
-        confirmar = input("⚠️ ¿Seguro que quieres BORRAR todos los sentimientos? (si/no): ").strip().lower()
+        confirmar = input("¿Seguro que quieres BORRAR todos los sentimientos? (si/no): ").strip().lower()
         if confirmar == "si":
             result = reviews_col.update_many(
                 {},
@@ -180,10 +180,10 @@ def main():
                     "sentiment_model": ""
                 }}
             )
-            print(f"✅ Eliminados sentimientos de {result.modified_count} reseñas")
+            print(f"Eliminados sentimientos de {result.modified_count} reseñas")
             sin_sentimiento = total_reviews
         else:
-            print("❌ Operación cancelada")
+            print("Operación cancelada")
             return
     
     # Procesar reseñas
@@ -193,13 +193,13 @@ def main():
     lote_num = 0
     
     print(f"\n{'='*80}")
-    print(f"⚙️ PROCESANDO RESEÑAS")
+    print(f"PROCESANDO RESEÑAS")
     print(f"{'='*80}\n")
     
     try:
         while True:
             lote_num += 1
-            print(f"📦 Lote {lote_num}:")
+            print(f"Lote {lote_num}:")
             
             exitosas, fallidas = enriquecer_lote(
                 limit=50, 
@@ -207,7 +207,7 @@ def main():
             )
             
             if exitosas == 0 and fallidas == 0:
-                print("✅ No hay más reseñas pendientes")
+                print("No hay más reseñas pendientes")
                 break
             
             total_procesadas += (exitosas + fallidas)
@@ -215,38 +215,38 @@ def main():
             total_fallidas += fallidas
             
             print(f"  ✓ Exitosas: {exitosas} | Fallidas: {fallidas}")
-            print(f"  📊 Progreso: {total_exitosas}/{sin_sentimiento}")
+            print(f"  Progreso: {total_exitosas}/{sin_sentimiento}")
             
             # Si es modo interactivo (opción 2), preguntar si continuar
             if opcion == "2":
                 continuar = input("\n  ¿Continuar con el siguiente lote? (s/n): ").strip().lower()
                 if continuar != "s":
-                    print("\n⏸️ Proceso pausado por el usuario")
+                    print("\nProceso pausado por el usuario")
                     break
             
             print()  # Línea en blanco entre lotes
             
     except KeyboardInterrupt:
-        print("\n\n⚠️ Proceso interrumpido por el usuario (Ctrl+C)")
+        print("\n\nProceso interrumpido por el usuario (Ctrl+C)")
     
     # Resumen final
     print(f"\n{'='*80}")
-    print(f"🏁 PROCESO COMPLETADO")
+    print(f"PROCESO COMPLETADO")
     print(f"{'='*80}")
-    print(f"✅ Reseñas analizadas exitosamente: {total_exitosas}")
-    print(f"❌ Reseñas con error: {total_fallidas}")
-    print(f"📊 Total procesadas: {total_procesadas}")
+    print(f"Reseñas analizadas exitosamente: {total_exitosas}")
+    print(f"Reseñas con error: {total_fallidas}")
+    print(f"Total procesadas: {total_procesadas}")
     
     # Estadísticas finales
     con_sentimiento_final = reviews_col.count_documents({"sentiment_score": {"$exists": True}})
     sin_sentimiento_final = total_reviews - con_sentimiento_final
     
-    print(f"\n📊 Estado final:")
+    print(f"\nEstado final:")
     print(f"  • Con sentimiento: {con_sentimiento_final}/{total_reviews}")
     print(f"  • Pendientes: {sin_sentimiento_final}")
     
     # Distribución final
-    print(f"\n📊 Distribución de sentimientos:")
+    print(f"\nDistribución de sentimientos:")
     for label in ["positivo", "neutral", "negativo"]:
         count = reviews_col.count_documents({"sentiment_label": label})
         porcentaje = (count / con_sentimiento_final) * 100 if con_sentimiento_final > 0 else 0

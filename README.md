@@ -1,21 +1,21 @@
-# 📊 Análisis de Sentimientos - MercadoLibre Ecuador
+# Análisis de Sentimientos - MercadoLibre Ecuador
 
 Proyecto de análisis de sentimientos de reseñas de productos de MercadoLibre Ecuador usando técnicas de NLP (Procesamiento de Lenguaje Natural).
 
-## 🚀 Características
+## Características
 
 - **Web Scraping**: Extracción de productos y reseñas de MercadoLibre Ecuador
 - **Análisis de Sentimientos**: Clasificación automática usando modelo `pysentimiento/robertuito-sentiment-analysis`
 - **Dashboard Interactivo**: Visualización de resultados con Streamlit
 - **Base de Datos**: Almacenamiento en MongoDB Atlas
 
-## 📦 Categorías Analizadas
+## Categorías Analizadas
 
 - Audífonos
 - Laptops
 - Televisores
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 - **Python 3.8+**
 - **BeautifulSoup4**: Web scraping
@@ -25,13 +25,13 @@ Proyecto de análisis de sentimientos de reseñas de productos de MercadoLibre E
 - **Streamlit**: Dashboard interactivo
 - **Pandas, Matplotlib, WordCloud**: Análisis y visualización
 
-## 📋 Requisitos
+## Requisitos
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## ⚙️ Configuración
+## Configuración
 
 1. Crear archivo `.env` en la raíz del proyecto:
 
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 2. Reemplazar con tu URI de MongoDB Atlas
 
-## 🚀 Uso
+## Uso
 
 ### 1. Scraping de Productos
 
@@ -70,12 +70,12 @@ Clasifica las reseñas en: positivo, neutral, negativo.
 ### 4. Dashboard
 
 ```bash
-streamlit run dashboard.py
+python -m streamlit run dashboard.py
 ```
 
 Visualiza los resultados en un dashboard interactivo.
 
-## 📊 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 ml_sentiment/
@@ -92,32 +92,32 @@ ml_sentiment/
 └── README.md               # Este archivo
 ```
 
-## 📈 Resultados
+## Resultados
 
 El dashboard muestra:
 
-- ✅ Distribución de sentimientos por categoría
-- ✅ Análisis por producto individual
-- ✅ Nubes de palabras positivas/negativas
-- ✅ Top 10 palabras más frecuentes
-- ✅ Exportación de datos a CSV
+- Distribución de sentimientos por categoría
+- Análisis por producto individual
+- Nubes de palabras positivas/negativas
+- Top 10 palabras más frecuentes
+- Exportación de datos a CSV
 
-## 🤖 Modelo de IA
+## Modelo de IA
 
 **Modelo**: `pysentimiento/robertuito-sentiment-analysis`
 - Entrenado específicamente para español
 - Clasificación: POS / NEU / NEG
 - Basado en RoBERTa
 
-## 📝 Licencia
+## Licencia
 
 MIT License
 
-## 👤 Autor
+## Autor
 
 [Tu Nombre]
 
-## 🔗 Links
+## Links
 
 - [MercadoLibre Ecuador](https://www.mercadolibre.com.ec/)
 - [Pysentimiento](https://github.com/pysentimiento/pysentimiento)

@@ -8,9 +8,9 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import re
 
-# ------------------------
+
 # Config MongoDB
-# ------------------------
+
 load_dotenv()
 MONGODB_URI = os.getenv("MONGODB_URI")
 
@@ -21,9 +21,9 @@ client = MongoClient(MONGODB_URI)
 db = client["ml_reviews"]
 reviews_col = db["raw_reviews"]
 
-# ------------------------
+
 # Funciones auxiliares
-# ------------------------
+
 @st.cache_data
 def cargar_datos():
     """
@@ -68,12 +68,12 @@ STOPWORDS_ES = {
     "hay","aqui","ahí","ahi","pues","pero","si","no","muy","bien","mal","super",
     "tan","solo","solo","sólo","fue","sido","estar","tener","hacer","vez","veces",
     "puede","pueden","debe","deben","algún","alguna","otros","otras","cada","mismo",
-    "misma","quiero","quiere","dar","dio","dió","hecho","hacer",
+    "misma","quiero","quiere","dar","dio","dió","hecho","hacer","está","horas",
     
     # Palabras genéricas de opinión que NO aportan insight
     "reseña","opinion","opinión","review","comentario","calificacion","calificación",
     "estrellas","estrella","puntos","valoracion","valoración","evaluacion","evaluación",
-    "bueno","buena","malo","mala","regular","normal","común","típico","tipico",
+    "bueno","buena","regular","normal","común","típico","tipico",
     
     # Contexto de compra/producto (demasiado genérico)
     "producto","productos","artículo","articulo","artículos","articulos","item",
@@ -85,17 +85,17 @@ STOPWORDS_ES = {
     "cliente","clientes","servicio","atención","atencion",
     
     # Palabras sobre uso/experiencia (muy genéricas)
-    "uso","usar","usado","usada","utilizar","utilizando","utilizó","utilizo",
+    "uso","usar","usada","utilizar","utilizando","utilizó","utilizo",
     "funcionamiento","función","funciona","funcionan","funcionar",
     
     # Adjetivos vagos
     "útil","util","útiles","utiles","opciones","opción","opcion","expectativas",
     "características","caracteristicas","materiales","material",
-    "tamaño","tamano","color","colores","modelo","modelos",
+    "tamaño","tamano","color","colores","modelo","modelos", "único","opiniones",
     
     # Verbos comunes poco informativos
-    "recomiendo","recomendar","recomendado","recomendada","recomendable",
-    "cumple","cumplir","esperar","esperaba","esperado","esperando",
+    "recomiendo","recomendar","recomendada","recomendable",
+    "cumple","cumplir","esperar","esperaba","esperado","esperando","geniales","mejor",
     
     # Temporalidad genérica
     "dias","día","dias","meses","mes","año","anos","tiempo","veces","primera","primer",
@@ -140,15 +140,13 @@ def limpiar_texto(texto: str) -> str:
     
     return " ".join(palabras_filtradas)
 
-# ------------------------
-# Interfaz Streamlit
-# ------------------------
+
 st.set_page_config(
     page_title="Sentimiento de productos - Mercado Libre",
     layout="wide"
 )
 
-st.title("📊 Dashboard de Sentimiento de Productos (Mercado Libre)")
+st.title("Dashboard de Sentimiento de Productos (Mercado Libre)")
 st.caption("Análisis de opiniones de clientes usando PLN")
 
 df = cargar_datos()
@@ -188,9 +186,9 @@ total, pct_pos, pct_neu, pct_neg = calcular_metricas_generales(df_filtrado)
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total reseñas", total)
-col2.metric("😊 Positivas (%)", pct_pos)
-col3.metric("😐 Neutras (%)", pct_neu)
-col4.metric("😞 Negativas (%)", pct_neg)
+col2.metric(" Positivas (%)", pct_pos)
+col3.metric(" Neutras (%)", pct_neu)
+col4.metric(" Negativas (%)", pct_neg)
 
 st.markdown("---")
 
@@ -219,7 +217,7 @@ if "categoria" in df_filtrado.columns:
         height=400
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width='stretch')
 else:
     st.info("Los documentos no tienen campo 'categoria' definido.")
 
@@ -244,9 +242,9 @@ if "titulo_producto" in df_filtrado.columns:
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Reseñas del producto", total_p)
-    c2.metric("😊 Positivas (%)", pct_pos_p)
-    c3.metric("😐 Neutras (%)", pct_neu_p)
-    c4.metric("😞 Negativas (%)", pct_neg_p)
+    c2.metric(" Positivas (%)", pct_pos_p)
+    c3.metric(" Neutras (%)", pct_neu_p)
+    c4.metric(" Negativas (%)", pct_neg_p)
 
     # Tabla de reseñas
     st.write("Reseñas del producto (muestra):")
@@ -259,14 +257,14 @@ else:
     st.info("Los documentos no tienen campo 'titulo_producto' definido.")
 
 st.markdown("---")
-st.subheader("☁️ Nube de palabras por sentimiento")
+st.subheader(" Nube de palabras por sentimiento")
 st.caption("Palabras más frecuentes en opiniones positivas vs negativas (filtrado inteligente)")
 
 col_pos, col_neg = st.columns(2)
 
 # ---- Nube de reseñas positivas ----
 with col_pos:
-    st.markdown("**😊 Reseñas positivas**")
+    st.markdown("** Reseñas positivas**")
     df_pos = df_filtrado[df_filtrado["sentiment_label"] == "positivo"]
     if not df_pos.empty:
         texto_pos = " ".join(df_pos["reseña_texto"].astype(str).apply(limpiar_texto).tolist())
@@ -293,7 +291,7 @@ with col_pos:
 
 # ---- Nube de reseñas negativas ----
 with col_neg:
-    st.markdown("**😞 Reseñas negativas**")
+    st.markdown("** Reseñas negativas**")
     df_neg = df_filtrado[df_filtrado["sentiment_label"] == "negativo"]
     if not df_neg.empty:
         texto_neg = " ".join(df_neg["reseña_texto"].astype(str).apply(limpiar_texto).tolist())
@@ -320,12 +318,12 @@ with col_neg:
 
 # ----- Análisis adicional -----
 st.markdown("---")
-st.subheader("📈 Top palabras por sentimiento")
+st.subheader(" Top palabras por sentimiento")
 
 col_top1, col_top2 = st.columns(2)
 
 with col_top1:
-    st.markdown("**😊 Top 10 palabras positivas**")
+    st.markdown("** Top 10 palabras positivas**")
     if not df_pos.empty:
         texto_pos_limpio = " ".join(df_pos["reseña_texto"].astype(str).apply(limpiar_texto).tolist())
         palabras_pos = texto_pos_limpio.split()
@@ -336,7 +334,7 @@ with col_top1:
             st.dataframe(df_top_pos, hide_index=True)
 
 with col_top2:
-    st.markdown("**😞 Top 10 palabras negativas**")
+    st.markdown("** Top 10 palabras negativas**")
     if not df_neg.empty:
         texto_neg_limpio = " ".join(df_neg["reseña_texto"].astype(str).apply(limpiar_texto).tolist())
         palabras_neg = texto_neg_limpio.split()
@@ -348,12 +346,12 @@ with col_top2:
 
 # ----- Exportar datos -----
 st.markdown("---")
-st.subheader("📥 Exportar datos")
+st.subheader(" Exportar datos")
 
 if st.button("Descargar CSV de reseñas filtradas"):
     csv = df_filtrado.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="💾 Descargar archivo CSV",
+        label=" Descargar archivo CSV",
         data=csv,
         file_name="reviews_sentiment.csv",
         mime="text/csv"

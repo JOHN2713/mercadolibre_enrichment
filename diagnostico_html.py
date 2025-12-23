@@ -14,10 +14,10 @@ soup = BeautifulSoup(resp.text, "html.parser")
 with open("pagina_completa.html", "w", encoding="utf-8") as f:
     f.write(resp.text)
 
-print("✅ HTML guardado en pagina_completa.html")
+print(" HTML guardado en pagina_completa.html")
 
 # Buscar diferentes contenedores
-print("\n🔍 Buscando contenedores de productos...")
+print("\n Buscando contenedores de productos...")
 
 # Opción 1: li.ui-search-layout__item
 items_li = soup.select("li.ui-search-layout__item")
@@ -33,7 +33,7 @@ print(f"3. article: {len(items_article)} encontrados")
 
 # Si encontramos items, analizar el primero
 if items_li:
-    print("\n📦 Analizando primer item (li.ui-search-layout__item):")
+    print("\n Analizando primer item (li.ui-search-layout__item):")
     primer_item = items_li[0]
     
     # Buscar todos los h2
@@ -54,6 +54,6 @@ if items_li:
     with open("primer_item.html", "w", encoding="utf-8") as f:
         f.write(str(primer_item.prettify()))
     
-    print("\n✅ Primer item guardado en primer_item.html")
+    print("\n Primer item guardado en primer_item.html")
 
 print("\n🔍 Ejecuta este script y revisa los archivos generados")

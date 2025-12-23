@@ -41,13 +41,13 @@ HEADERS = {
 }
 
 def scrape_listing(category_name, url, debug_mode=False):
-    print(f"\n  🔍 Scrapeando: {url}")
+    print(f"\n Scrapeando: {url}")
     
     try:
         resp = requests.get(url, headers=HEADERS, timeout=15)
         resp.raise_for_status()
     except Exception as e:
-        print(f"  ❌ Error: {e}")
+        print(f" Error: {e}")
         return 0, False
 
     soup = BeautifulSoup(resp.text, "html.parser")
@@ -59,10 +59,10 @@ def scrape_listing(category_name, url, debug_mode=False):
     if not items:
         items = soup.select("div.ui-search-result")
 
-    print(f"  📦 Encontrados {len(items)} items en la página")
+    print(f" Encontrados {len(items)} items en la página")
 
     if not items:
-        print(f"  ⚠️ No se encontraron items")
+        print(f" No se encontraron items")
         return 0, False
 
     docs_to_insert = []
@@ -88,7 +88,7 @@ def scrape_listing(category_name, url, debug_mode=False):
         else:
             productos_sin_datos += 1
             if debug_mode and idx <= 5:
-                print(f"    ⚠️ Item {idx}: No se encontró enlace")
+                print(f" Item {idx}: No se encontró enlace")
             continue
         
         # Buscar precio
@@ -121,7 +121,7 @@ def scrape_listing(category_name, url, debug_mode=False):
         if products_col.find_one({"url_producto": product_url}):
             productos_duplicados += 1
             if debug_mode and idx <= 5:
-                print(f"    ℹ️ Item {idx}: Duplicado - {title[:40]}...")
+                print(f" Item {idx}: Duplicado - {title[:40]}...")
             continue
 
         doc = {
@@ -140,11 +140,11 @@ def scrape_listing(category_name, url, debug_mode=False):
     if docs_to_insert:
         result = products_col.insert_many(docs_to_insert)
         insertados = len(result.inserted_ids)
-        print(f"  ✅ Insertados: {insertados} productos nuevos")
+        print(f" Insertados: {insertados} productos nuevos")
     else:
-        print(f"  ℹ️ No hay productos nuevos")
+        print(f" No hay productos nuevos")
     
-    print(f"  📊 {insertados} nuevos | {productos_duplicados} duplicados | {productos_sin_datos} sin datos")
+    print(f" {insertados} nuevos | {productos_duplicados} duplicados | {productos_sin_datos} sin datos")
     
     # Retornar si hay más contenido disponible
     hay_mas = len(items) >= 40
@@ -155,7 +155,7 @@ def scrape_listing(category_name, url, debug_mode=False):
 def scrape_categoria_interactivo(category_name, base_url, max_pages):
     """Scrapea una categoría con control manual de páginas"""
     print(f"\n{'='*80}")
-    print(f"📦 CATEGORÍA: {category_name.upper()}")
+    print(f"CATEGORÍA: {category_name.upper()}")
     print(f"{'='*80}")
     
     page = 0
@@ -169,7 +169,7 @@ def scrape_categoria_interactivo(category_name, base_url, max_pages):
             offset = (page * 48) + 1
             page_url = f"{base_url}_Desde_{offset}_NoIndex_True"
         
-        print(f"\n📄 Página {page + 1}/{max_pages}")
+        print(f"\nPágina {page + 1}/{max_pages}")
         
         # Scrapear la página (debug_mode=True en primeras 2 páginas)
         nuevos, hay_mas = scrape_listing(category_name, page_url, debug_mode=(page < 2))
@@ -177,18 +177,18 @@ def scrape_categoria_interactivo(category_name, base_url, max_pages):
         
         # Mostrar estadísticas actuales
         count_actual = products_col.count_documents({"categoria": category_name})
-        print(f"\n  📊 Total en BD para {category_name}: {count_actual} productos")
+        print(f"\n  Total en BD para {category_name}: {count_actual} productos")
         
         if not hay_mas:
-            print(f"\n  ⚠️ No hay más páginas disponibles para {category_name}")
+            print(f"\n No hay más páginas disponibles para {category_name}")
             break
         
         # Preguntar si continuar
         print(f"\n  {'─'*76}")
         print(f"  ¿Qué deseas hacer?")
-        print(f"    1. ➡️  Continuar a la siguiente página")
-        print(f"    2. ⏭️  Saltar a la siguiente categoría")
-        print(f"    3. 🛑 Terminar scraping")
+        print(f"    1. Continuar a la siguiente página")
+        print(f"    2. Saltar a la siguiente categoría")
+        print(f"    3. Terminar scraping")
         
         opcion = input("\n  Opción (1/2/3): ").strip()
         
@@ -200,7 +200,7 @@ def scrape_categoria_interactivo(category_name, base_url, max_pages):
         elif opcion == "3":
             return total_nuevos, True
         else:
-            print("  ⚠️ Opción inválida, continuando...")
+            print(" Opción inválida, continuando...")
             page += 1
             time.sleep(1)
     
@@ -210,11 +210,11 @@ def scrape_categoria_interactivo(category_name, base_url, max_pages):
 
 def main():
     print("="*80)
-    print("🚀 SCRAPING INTERACTIVO - MERCADOLIBRE ECUADOR")
+    print("SCRAPING INTERACTIVO - MERCADOLIBRE ECUADOR")
     print("="*80)
     
     # Mostrar estado actual
-    print(f"\n📊 Estado actual de la base de datos:")
+    print(f"\nEstado actual de la base de datos:")
     for category in LISTING_CONFIG.keys():
         count = products_col.count_documents({"categoria": category})
         print(f"  • {category.capitalize()}: {count} productos")
@@ -223,7 +223,7 @@ def main():
     print(f"\n  Total: {total_bd} productos")
     
     # Preguntar si quiere limpiar
-    print("\n⚠️ OPCIONES:")
+    print("\nOPCIONES:")
     print("1. Continuar agregando productos")
     print("2. LIMPIAR base de datos y empezar de cero")
     print("3. Ver muestra de productos en BD")
@@ -231,15 +231,15 @@ def main():
     opcion = input("\nSelecciona una opción (1/2/3): ").strip()
     
     if opcion == "2":
-        confirmar = input("⚠️ ¿Estás seguro de ELIMINAR todos los productos? (si/no): ").strip().lower()
+        confirmar = input("¿Estás seguro de ELIMINAR todos los productos? (si/no): ").strip().lower()
         if confirmar == "si":
             result = products_col.delete_many({})
-            print(f"✅ Eliminados {result.deleted_count} productos")
+            print(f"Eliminados {result.deleted_count} productos")
         else:
-            print("❌ Operación cancelada")
+            print("Operación cancelada")
             return
     elif opcion == "3":
-        print("\n📋 Muestra de productos en BD (primeros 5):")
+        print("\nMuestra de productos en BD (primeros 5):")
         for doc in products_col.find().limit(5):
             print(f"  • {doc.get('titulo', 'Sin título')[:60]}...")
             print(f"    URL: {doc.get('url_producto', 'Sin URL')[:80]}...")
@@ -263,12 +263,12 @@ def main():
     
     # Resumen final
     print(f"\n{'='*80}")
-    print(f"🏁 SCRAPING FINALIZADO")
+    print(f"SCRAPING FINALIZADO")
     print(f"{'='*80}")
-    print(f"✅ Total de productos NUEVOS agregados: {total_productos}")
-    print(f"📊 Total de productos en BD: {products_col.count_documents({})}")
+    print(f"Total de productos NUEVOS agregados: {total_productos}")
+    print(f"Total de productos en BD: {products_col.count_documents({})}")
     
-    print(f"\n📊 DISTRIBUCIÓN FINAL:")
+    print(f"\nDISTRIBUCIÓN FINAL:")
     for category in LISTING_CONFIG.keys():
         count = products_col.count_documents({"categoria": category})
         print(f"  • {category.capitalize()}: {count} productos")

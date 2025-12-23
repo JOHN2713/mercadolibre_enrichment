@@ -30,13 +30,37 @@ def setup_driver():
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    return driver
+    driver = None
+    
+    # Intento 1: Usar chromedriver del sistema (sin descargar)
+    try:
+        print("Intentando usar ChromeDriver del sistema...")
+        driver = webdriver.Chrome(options=chrome_options)
+        print("✓ ChromeDriver del sistema funcionando")
+        return driver
+    except Exception as e:
+        print(f"  No disponible: {e}")
+    
+    # Intento 2: Usar ChromeDriverManager con caché offline
+    try:
+        print("Intentando usar ChromeDriver desde caché...")
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        print("✓ ChromeDriver desde caché funcionando")
+        return driver
+    except Exception as e:
+        print(f"  Error: {e}")
+        raise Exception(
+            "No se pudo iniciar ChromeDriver.\n"
+            "Soluciones:\n"
+            "1. Verifica tu conexión a internet\n"
+            "2. Instala ChromeDriver manualmente y agrégalo al PATH\n"
+            "3. Descarga desde: https://chromedriver.chromium.org/"
+        )
 
 def extract_reviews_selenium(driver, url, max_reviews=20):  # Aumentado a 20
     """Extrae reseñas usando Selenium"""
-    print(f"  🔍 Cargando página con Selenium...")
+    print(f"   Cargando página con Selenium...")
     driver.get(url)
     
     reviews_data = []
@@ -87,12 +111,12 @@ def extract_reviews_selenium(driver, url, max_reviews=20):  # Aumentado a 20
                 continue
         
         if not review_elements:
-            print("  ⚠️ No se encontraron reseñas con los selectores conocidos")
+            print("   No se encontraron reseñas con los selectores conocidos")
             # DEBUG: Guardar HTML solo del primer producto sin reseñas
             if not os.path.exists("debug_product_page.html"):
                 with open("debug_product_page.html", "w", encoding="utf-8") as f:
                     f.write(driver.page_source)
-                print("  📄 Página guardada en debug_product_page.html")
+                print("   Página guardada en debug_product_page.html")
             return []
         
         # Extraer texto de cada reseña
@@ -119,14 +143,14 @@ def extract_reviews_selenium(driver, url, max_reviews=20):  # Aumentado a 20
                     "texto": texto,
                     "puntuacion": rating
                 })
-                print(f"    ✓ Reseña {idx+1}: {texto[:50]}... | Rating: {rating}")
+                print(f"     Reseña {idx+1}: {texto[:50]}... | Rating: {rating}")
                 
             except Exception as e:
-                print(f"    ⚠️ Error extrayendo reseña {idx+1}: {e}")
+                print(f"     Error extrayendo reseña {idx+1}: {e}")
                 continue
         
     except Exception as e:
-        print(f"  ❌ Error general: {e}")
+        print(f"   Error general: {e}")
     
     return reviews_data
 
@@ -136,20 +160,20 @@ def scrape_reviews_for_product(driver, product_doc, max_reviews=20):  # Aumentad
     titulo = product_doc.get("titulo")
 
     print(f"\n{'='*80}")
-    print(f"🛒 Producto: {titulo}")
-    print(f"📂 Categoría: {categoria}")
-    print(f"🔗 URL: {url}")
+    print(f" Producto: {titulo}")
+    print(f" Categoría: {categoria}")
+    print(f" URL: {url}")
 
     # Verificar si ya tiene reseñas en la BD
     existing_count = reviews_col.count_documents({"producto_mongo_id": product_doc["_id"]})
     if existing_count > 0:
-        print(f"  ℹ️ Este producto ya tiene {existing_count} reseñas. Saltando...")
+        print(f"   Este producto ya tiene {existing_count} reseñas. Saltando...")
         return
 
     reviews = extract_reviews_selenium(driver, url, max_reviews)
 
     if not reviews:
-        print("  ⚠️ No se encontraron reseñas para este producto.")
+        print("   No se encontraron reseñas para este producto.")
         return
 
     docs_to_insert = []
@@ -166,19 +190,19 @@ def scrape_reviews_for_product(driver, product_doc, max_reviews=20):  # Aumentad
         docs_to_insert.append(doc)
 
     result = reviews_col.insert_many(docs_to_insert)
-    print(f"✅ Insertadas {len(result.inserted_ids)} reseñas en MongoDB.")
+    print(f" Insertadas {len(result.inserted_ids)} reseñas en MongoDB.")
 
 def main():
     # Obtener TODOS los productos (sin limit)
     productos = list(products_col.find())
 
     if not productos:
-        print("❌ No hay productos en la colección 'products'.")
+        print(" No hay productos en la colección 'products'.")
         print("   Ejecuta primero scrape_products.py")
         return
 
-    print(f"📊 Total de productos a procesar: {len(productos)}")
-    print(f"📊 Reseñas actuales en BD: {reviews_col.count_documents({})}")
+    print(f" Total de productos a procesar: {len(productos)}")
+    print(f" Reseñas actuales en BD: {reviews_col.count_documents({})}")
 
     driver = setup_driver()
     
@@ -202,10 +226,10 @@ def main():
     finally:
         driver.quit()
         print(f"\n{'='*80}")
-        print(f"🏁 Scraping completado.")
-        print(f"✅ Productos con reseñas: {productos_procesados}/{len(productos)}")
-        print(f"✅ Total de reseñas obtenidas: {reseñas_totales}")
-        print(f"📊 Total en BD: {reviews_col.count_documents({})}")
+        print(f" Scraping completado.")
+        print(f" Productos con reseñas: {productos_procesados}/{len(productos)}")
+        print(f" Total de reseñas obtenidas: {reseñas_totales}")
+        print(f" Total en BD: {reviews_col.count_documents({})}")
 
 if __name__ == "__main__":
     main()
